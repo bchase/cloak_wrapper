@@ -6,19 +6,19 @@
 ```sh
 gleam add cloak_wrapper@1
 ```
+
 ```gleam
 import cloak_wrapper as cloak
 
-pub fn main() {
-  // TODO: An example of the project in use
-}
-```
+let cloak_cfg =
+  cloak.config_aes_gcm(
+    key: "rf2xCGeAqlYP2T3PoO8PkMW2jic2FsPwJ8lnuVo0X1Y=",
+    tag:  "AES.GCM.V1",
+    iv_length: 12,
+  )
 
-Further documentation can be found at <https://hexdocs.pm/cloak_wrapper>.
+let plaintext = "Fear is the little-death that brings total obliteration."
 
-## Development
-
-```sh
-gleam run   # Run the project
-gleam test  # Run the tests
+let assert Ok(encrypted) = cloak.encrypt_aes_gcm(cloak_cfg, plaintext)
+let assert Ok(decrypted) = cloak.decrypt_aes_gcm(cloak_cfg, encrypted)
 ```
