@@ -1,6 +1,6 @@
 import gleam/bit_array
 import gleam/result
-
+import cloak_wrapper/internal/ffi.{Key, Tag, IvLength} as cloak_ffi
 
 // CONFIG
 
@@ -23,20 +23,18 @@ pub fn config_aes_gcm(
   ConfigAesGcm(key, tag, iv_length)
 }
 
-
 // ENCRYPT & DECRYPT
 
 pub fn encrypt_aes_gcm(
   cloak: ConfigAesGcm,
   plaintext: String,
 ) -> Result(String, Nil) {
-  // encrypt_aes_gcm_erlang(plaintext, cloak.key, cloak.tag, cloak.iv_length)
-  encrypt_aes_gcm_elixir(plaintext, [
+  cloak_ffi.encrypt_aes_gcm(plaintext, [
     Key(cloak.key),
     Tag(cloak.tag),
     IvLength(cloak.iv_length),
   ])
-  |> result.map (bit_array.base64_encode(_, True))
+  |> result.map(bit_array.base64_encode(_, True))
 }
 
 pub fn decrypt_aes_gcm(
@@ -45,47 +43,9 @@ pub fn decrypt_aes_gcm(
 ) -> Result(String, Nil) {
   value
   |> bit_array.base64_decode()
-  // |> result.then(decrypt_aes_gcm_erlang(_, cloak.key, cloak.tag, cloak.iv_length))
-  |> result.then(decrypt_aes_gcm_elixir(_, [
+  |> result.then(cloak_ffi.decrypt_aes_gcm(_, [
     Key(cloak.key),
     Tag(cloak.tag),
     IvLength(cloak.iv_length),
   ]))
 }
-
-type CloakOpt {
-  Key(BitArray)
-  Tag(BitArray)
-  IvLength(Int)
-}
-
-
-// FFI
-
-@external(erlang, "Elixir.Cloak.Ciphers.AES.GCM", "encrypt")
-fn encrypt_aes_gcm_elixir(
-  plaintext: String,
-  opts: List(CloakOpt)
-) -> Result(BitArray, Nil)
-
-@external(erlang, "Elixir.Cloak.Ciphers.AES.GCM", "decrypt")
-fn decrypt_aes_gcm_elixir(
-  plaintext: BitArray,
-  opts: List(CloakOpt)
-) -> Result(String, Nil)
-
-// @external(erlang, "cloak_wrapper_ffi", "encrypt_aes_gcm")
-// fn encrypt_aes_gcm_erlang(
-//   plaintext: String,
-//   key: BitArray,
-//   tag: BitArray,
-//   iv_length: Int,
-// ) -> Result(BitArray, Nil)
-//
-// @external(erlang, "cloak_wrapper_ffi", "decrypt_aes_gcm")
-// fn decrypt_aes_gcm_erlang(
-//   plaintext: BitArray,
-//   key: BitArray,
-//   tag: BitArray,
-//   iv_length: Int,
-// ) -> Result(String, Nil)

@@ -1,5 +1,5 @@
 name = "cloak_wrapper"
-version = "1.0.0"
+version = "2.0.0"
 description = "Gleam wrapper for Cloak (Elixir)"
 licences = ["MIT"]
 repository = { type = "github", user = "bchase", repo = "cloak_wrapper" }
@@ -8,6 +8,7 @@ repository = { type = "github", user = "bchase", repo = "cloak_wrapper" }
 [dependencies]
 gleam_stdlib = ">= 0.34.0 and < 2.0.0"
 cloak = ">= 1.1.4 and < 2.0.0"
+gleam_crypto = ">= 1.5.1 and < 2.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
