@@ -23,8 +23,8 @@ pub fn elixir_cloak_encrypt_decrypt_test() {
   let plaintext = "Fear is the little-death that brings total obliteration."
 
   Ok(plaintext)
-  |> result.then(cloak.encrypt(_, cloak))
-  |> result.then(cloak.decrypt(_, cloak))
+  |> result.try(cloak.encrypt(_, cloak))
+  |> result.try(cloak.decrypt(_, cloak))
   |> result.unwrap("FAILED elixir_cloak_encrypt_decrypt_test")
   |> should.equal(plaintext)
 }
