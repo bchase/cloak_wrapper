@@ -1,30 +1,47 @@
-import gleam/result
+import cloak_wrapper/aes/gcm as aes_gcm
+import cloak_wrapper/crypto/key
+import cloak_wrapper/store
+import gleam/erlang/process
 import gleeunit
 import gleeunit/should
-// import cloak_wrapper as cloak
-import cloak_wrapper/aes/gcm as cloak
-import cloak_wrapper/crypto/key
 
 pub fn main() {
   gleeunit.main()
 }
 
-pub fn elixir_cloak_encrypt_decrypt_test() {
-  let key = key.gen_base64(32)
+const plaintext = "Fear is the little-death that brings total obliteration."
 
-  let cloak =
-    cloak.config(
-      // key: "rf2xCGeAqlYP2T3PoO8PkMW2jic2FsPwJ8lnuVo0X1Y=",
-      key:,
-      tag:  "AES.GCM.V1",
-      iv_length: 12,
-    )
+pub fn cloak_encrypt_decrypt_test() {
+  let config = build_config()
 
-  let plaintext = "Fear is the little-death that brings total obliteration."
+  let assert Ok(ciphertext) = aes_gcm.encrypt(plaintext:, config:)
+  let assert Ok(decrypted) = aes_gcm.decrypt(ciphertext:, config:)
 
-  Ok(plaintext)
-  |> result.try(cloak.encrypt(_, cloak))
-  |> result.try(cloak.decrypt(_, cloak))
-  |> result.unwrap("FAILED elixir_cloak_encrypt_decrypt_test")
-  |> should.equal(plaintext)
+  ciphertext |> should.not_equal(plaintext)
+  decrypted |> should.equal(plaintext)
+}
+
+pub fn store_test() {
+  let name = process.new_name("store_test")
+
+  let assert Ok(_started) = store.start(name:, load: fn() { build_config() })
+
+  let store = store.get(name)
+
+  let assert Ok(ciphertext) = store.encrypt(plaintext:, store:)
+  let assert Ok(decrypted) = store.decrypt(ciphertext:, store:)
+
+  ciphertext |> should.not_equal(plaintext)
+  decrypted |> should.equal(plaintext)
+}
+
+//
+
+fn build_config() -> aes_gcm.Config {
+  aes_gcm.config(
+    // key: "rf2xCGeAqlYP2T3PoO8PkMW2jic2FsPwJ8lnuVo0X1Y=",
+    key: key.gen_base64(32),
+    tag: "AES.GCM.V1",
+    iv_length: 12,
+  )
 }
